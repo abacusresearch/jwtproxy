@@ -119,10 +119,12 @@ func Verify(req *http.Request, keyServer keyserver.Reader, nonceVerifier noncest
 	if exp.Sub(iat) > maxTTL {
 		return nil, errors.New("Invalid 'exp' claim (too long)")
 	}
+/*
 	jti, exists, err := claims.StringClaim("jti")
 	if !exists || err != nil || !nonceVerifier.Verify(jti, exp) {
 		return nil, errors.New("Missing or invalid 'jti' claim")
 	}
+*/
 
 	// Verify signature.
 	publicKey, err := keyServer.GetPublicKey(iss, kid)
