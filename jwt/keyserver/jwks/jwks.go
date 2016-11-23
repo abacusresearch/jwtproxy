@@ -56,7 +56,7 @@ type ReaderConfig struct {
 
 func (krc *client) GetPublicKey(issuer string, keyID string) (*key.PublicKey, error) {
 	// Query java web key set for a public key matching the given issuer and key ID.
-	pubkeyURL := krc.absURL(keyID)
+	pubkeyURL := krc.jwks
 	pubkeyReq, err := krc.prepareRequest("GET", pubkeyURL, nil)
 	if err != nil {
 		return nil, err
