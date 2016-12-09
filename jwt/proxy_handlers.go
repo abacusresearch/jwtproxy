@@ -21,6 +21,10 @@ import (
 	"net/http"
 	"net/url"
 	"strings"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/hex"
+
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/goproxy"
@@ -136,10 +140,14 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 
 		// set user info as headers
 		sub, _, _ := signedClaims.StringClaim("sub")
-
 		r.Header["X-Forwarded-User"] = []string{sub}
-		r.Header["X-Auth-CouchDB-Token"] = []string{cfg.ProxyToken}
 		r.Header["X-Auth-CouchDB-Roles"] = []string{""}
+
+		mac := hmac.New(sha1.New, []byte(cfg.ProxyToken))
+		mac.Write([]byte(sub))
+		macHEX := hex.EncodeToString(mac.Sum(nil))
+
+		r.Header["X-Auth-CouchDB-Token"] = []string{macHEX}
 
 		// Route the request to upstream.
 		route(r, ctx)
