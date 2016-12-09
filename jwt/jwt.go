@@ -139,11 +139,9 @@ func Verify(req *http.Request, keyServer keyserver.Reader, nonceVerifier noncest
 		return nil, errors.New("Unexpected verifier initialization failure")
 	}
 
-/*
 	if verifier.Verify(jwt.Signature, []byte(jwt.Data())) != nil {
 		return nil, errors.New("Invalid JWT signature")
 	}
-*/
 	return claims, nil
 }
 
