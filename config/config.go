@@ -115,6 +115,7 @@ type SignerProxyConfig struct {
 type VerifierConfig struct {
 	Upstream        URL                          `yaml:"upstream"`
 	Audience        URL                          `yaml:"audience"`
+	ProxyToken      string                       `yaml:"proxy_token"`
 	MaxSkew         time.Duration                `yaml:"max_skew"`
 	MaxTTL          time.Duration                `yaml:"max_ttl"`
 	KeyServer       RegistrableComponentConfig   `yaml:"key_server"`

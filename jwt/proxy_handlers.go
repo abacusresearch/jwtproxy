@@ -134,6 +134,13 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 			}
 		}
 
+		// set user info as headers
+		sub, _, _ := signedClaims.StringClaim("sub")
+
+		r.Header["X-Forwarded-User"] = []string{sub}
+		r.Header["X-Auth-CouchDB-Token"] = []string{cfg.ProxyToken}
+		r.Header["X-Auth-CouchDB-Roles"] = []string{""}
+
 		// Route the request to upstream.
 		route(r, ctx)
 
