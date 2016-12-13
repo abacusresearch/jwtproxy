@@ -20,7 +20,7 @@ ENV XDG_CONFIG_HOME=/config/
 VOLUME /config
 
 ENTRYPOINT ["jwtproxy"]
-CMD ["-config", "/config/config.yaml"]
+CMD ["-config", "/config/config.yaml","-log-level", "debug"]
 
 ADD .   /go/src/github.com/coreos/jwtproxy/
 WORKDIR /go/src/github.com/coreos/jwtproxy/
