@@ -20,6 +20,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 	"crypto/hmac"
 	"crypto/sha1"
@@ -194,6 +195,34 @@ func newRouter(upstream *url.URL) router {
 		r.URL.Scheme = upstream.Scheme
 		r.URL.Host = upstream.Host
 		r.URL.Path = singleJoiningSlash(upstream.Path, r.URL.Path)
+
+		// https://jira.abacus.ch/browse/CLOUD-18
+
+		if strings.HasSuffix(r.URL.Path, "/_changesXXX") {
+			query := r.URL.Query()
+
+			feed := query.Get("feed")
+
+			if feed == "continuous" || feed == "longpoll" {
+				query.Del("heartbeat")
+
+				timeout, timeoutError := strconv.Atoi(query.Get("timeout"))
+
+				if timeoutError != nil || timeout > 50000 {
+					query.Set("timeout", "50000")
+				}
+
+				queryAfter := query.Encode()
+
+				log.WithFields(log.Fields {
+					"feed": feed,
+					"queryAfter": queryAfter,
+					"queryBefore": r.URL.RawQuery,
+                                }).Info("Changing query")
+
+				r.URL.RawQuery = queryAfter
+			}
+		}
 
 		upstreamQuery := upstream.RawQuery
 		if upstreamQuery == "" || r.URL.RawQuery == "" {
