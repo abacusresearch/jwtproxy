@@ -198,7 +198,7 @@ func newRouter(upstream *url.URL) router {
 
 		// https://jira.abacus.ch/browse/CLOUD-18
 
-		if strings.HasSuffix(r.URL.Path, "/_changesXXX") {
+		if strings.HasSuffix(r.URL.Path, "/_changes") {
 			query := r.URL.Query()
 
 			feed := query.Get("feed")
