@@ -1,6 +1,12 @@
-hash: 9d0f345dd589fd4a54e4a1db0c0885b1bd6180fcc0a776581c84208e60a3e983
-updated: 2017-09-26T15:18:50.165361523+02:00
+hash: 262917afb266decdd6d4cd04580e3f781398b8617cfcbd6bdaadb2e52384d5f8
+updated: 2017-09-26T15:21:21.928725098+02:00
 imports:
+- name: github.com/apache/thrift
+  version: b2a4d4ae21c789b689dd162deb819665567f481c
+  subpackages:
+  - lib/go/thrift
+- name: github.com/codahale/hdrhistogram
+  version: f8ad88b59a584afeee9d334eff879b104439117b
 - name: github.com/coreos/go-oidc
   version: f427f54ef96beaa1db5fabbe4fff00de535d5494
   subpackages:
@@ -30,6 +36,11 @@ imports:
   version: 4b02602f71f4346dfbd3ef8f4d15cc2a318b32c1
 - name: github.com/jonboulle/clockwork
   version: ed104f61ea4877bea08af6f759805674861e968d
+- name: github.com/opentracing/opentracing-go
+  version: 1949ddbfd147afd4d964a9f00b24eb291e0e7c38
+  subpackages:
+  - ext
+  - log
 - name: github.com/patrickmn/go-cache
   version: 1881a9bccb818787f68c52bfba648c6cf34c34fa
 - name: github.com/pmezard/go-difflib
@@ -44,9 +55,26 @@ imports:
   - assert
 - name: github.com/tylerb/graceful
   version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
+- name: github.com/uber/jaeger-client-go
+  version: 3e3870040def0ebdaf65a003863fa64f5cb26139
+  subpackages:
+  - config
+  - internal/spanlog
+  - log
+  - rpcmetrics
+  - thrift-gen/agent
+  - thrift-gen/jaeger
+  - thrift-gen/sampling
+  - thrift-gen/zipkincore
+  - utils
+- name: github.com/uber/jaeger-lib
+  version: 3b2a9ad2a045881ab7a0f81d465be54c8292ee4f
+  subpackages:
+  - metrics
 - name: golang.org/x/net
   version: 024ed629fd292398cfd43c9678a5bf004f7defdc
   subpackages:
+  - context
   - netutil
 - name: golang.org/x/sys
   version: a60af9cbbc6ab800af4f2be864a31f423a0ae1f2
