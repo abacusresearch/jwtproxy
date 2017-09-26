@@ -24,6 +24,7 @@ import (
 	"github.com/coreos/jwtproxy/jwt"
 	"github.com/coreos/jwtproxy/proxy"
 	"github.com/coreos/jwtproxy/stop"
+	"github.com/coreos/jwtproxy/tracing"
 )
 
 // RunProxies is an utility function that starts both the JWT verifier and signer proxies
@@ -33,6 +34,8 @@ import (
 func RunProxies(config *config.Config) (*stop.Group, chan error) {
 	stopper := stop.NewGroup()
 	abort := make(chan error)
+
+        tracing.InitGlobalTracer_production()
 
 	if config.SignerProxy.Enabled {
 		go StartForwardProxy(config.SignerProxy, stopper, abort)
