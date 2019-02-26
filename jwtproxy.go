@@ -16,7 +16,7 @@ package jwtproxy
 
 import (
 	"fmt"
-	"go.opencensus.io/examples/exporter"
+	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -39,8 +39,19 @@ func RunProxies(config *config.Config) (*stop.Group, chan error) {
 	abort := make(chan error)
 
 	// Register stats and trace exporters to export the collected data.
-	exporter := &exporter.PrintExporter{}
-	view.RegisterExporter(exporter)
+	exporter, err := jaeger.NewExporter(jaeger.Options{
+		AgentEndpoint: "localhost:6831",
+		Process: jaeger.Process{
+			ServiceName: "jwtproxy",
+		},
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	/* metrics disabled for now */
+	//view.RegisterExporter(exporter)
 	trace.RegisterExporter(exporter)
 
 	// Always trace for this demo. In a production application, you should
