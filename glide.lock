@@ -1,5 +1,5 @@
-hash: 9d0f345dd589fd4a54e4a1db0c0885b1bd6180fcc0a776581c84208e60a3e983
-updated: 2017-09-26T15:18:50.165361523+02:00
+hash: 6404140ebd5fa17d27b9fa6fbb604a2c062a970ab463384c1df0375d4dc06e41
+updated: 2019-02-26T15:18:21.594012465+01:00
 imports:
 - name: github.com/coreos/go-oidc
   version: f427f54ef96beaa1db5fabbe4fff00de535d5494
@@ -31,7 +31,7 @@ imports:
 - name: github.com/jonboulle/clockwork
   version: ed104f61ea4877bea08af6f759805674861e968d
 - name: github.com/patrickmn/go-cache
-  version: 1881a9bccb818787f68c52bfba648c6cf34c34fa
+  version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pmezard/go-difflib
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
@@ -44,6 +44,23 @@ imports:
   - assert
 - name: github.com/tylerb/graceful
   version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
+- name: go.opencensus.io
+  version: 2b5032d79456124f42db6b7eb19ac6c155449dc2
+  subpackages:
+  - examples/exporter
+  - exemplar
+  - internal
+  - internal/tagencoding
+  - plugin/ochttp
+  - plugin/ochttp/propagation/b3
+  - stats
+  - stats/internal
+  - stats/view
+  - tag
+  - trace
+  - trace/internal
+  - trace/propagation
+  - trace/tracestate
 - name: golang.org/x/net
   version: 024ed629fd292398cfd43c9678a5bf004f7defdc
   subpackages:

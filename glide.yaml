@@ -58,3 +58,10 @@ import:
   - json
 - package: gopkg.in/yaml.v2
   version: a83829b6f1293c91addabc89d0571c246397bbf4
+- package: go.opencensus.io
+  version: ^0.19.0
+  subpackages:
+  - plugin/ochttp
+  - examples/exporter
+  - stats/view
+  - trace
