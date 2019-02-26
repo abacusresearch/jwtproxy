@@ -1,5 +1,5 @@
-hash: 6404140ebd5fa17d27b9fa6fbb604a2c062a970ab463384c1df0375d4dc06e41
-updated: 2019-02-26T15:18:21.594012465+01:00
+hash: 09e8c1627ad1850f5ca6f150e2a59c55e24c456c4e59953e029e74e047ec5057
+updated: 2019-02-26T15:34:21.768015072+01:00
 imports:
 - name: github.com/coreos/go-oidc
   version: f427f54ef96beaa1db5fabbe4fff00de535d5494
@@ -14,7 +14,7 @@ imports:
   subpackages:
   - journal
 - name: github.com/coreos/goproxy
-  version: d49035e9433ee1038960c346999fdcb12e8704b5
+  version: 25fe2597a3d151ba954d9b3c0fd4663e79de48cc
 - name: github.com/coreos/pkg
   version: 1914e367e85eaf0c25d495b48e060dfe6190f8d0
   subpackages:
