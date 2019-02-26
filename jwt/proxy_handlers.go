@@ -136,7 +136,7 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 
 		signedClaims, err := Verify(r, keyServer, nonceStorage, cfg.Audience.URL, cfg.MaxSkew, cfg.MaxTTL)
 		if err != nil {
-			log.Error("jwtproxy: unable to verify request", err)
+			log.Error("jwtproxy: unable to verify request:", err)
 			span.SetStatus(trace.Status{
 				Code:    trace.StatusCodeUnauthenticated,
 				Message: err.Error(),
@@ -148,11 +148,14 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 		for _, verifier := range claimsVerifiers {
 			err := verifier.Handle(r, signedClaims)
 			if err != nil {
-				log.Error("Error verifying claims", err)
-				span.SetStatus(trace.Status{
-					Code:    trace.StatusCodeUnauthenticated,
-					Message: err.Error(),
-				})
+				log.Error("Error verifying claims:", err)
+				sub, _, _ := signedClaims.StringClaim("sub")
+				jti, _, _ := signedClaims.StringClaim("jti")
+				span.Annotate([]trace.Attribute{
+					trace.StringAttribute("error", err.Error()),
+					trace.StringAttribute("sub", sub),
+					trace.StringAttribute("jti", jti),
+				}, "Error verifying claims")
 				return r, goproxy.NewResponse(r, goproxy.ContentTypeText, http.StatusForbidden, fmt.Sprintf("Error verifying claims: %s", err))
 			}
 		}
