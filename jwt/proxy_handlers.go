@@ -137,10 +137,9 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 		signedClaims, err := Verify(r, keyServer, nonceStorage, cfg.Audience.URL, cfg.MaxSkew, cfg.MaxTTL)
 		if err != nil {
 			log.Error("jwtproxy: unable to verify request:", err)
-			span.SetStatus(trace.Status{
-				Code:    trace.StatusCodeUnauthenticated,
-				Message: err.Error(),
-			})
+			span.Annotate([]trace.Attribute{
+				trace.StringAttribute("error", err.Error()),
+			}, "unable to verify request")
 			return r, goproxy.NewResponse(r, goproxy.ContentTypeText, http.StatusUnauthorized, fmt.Sprintf("jwtproxy: unable to verify request: %s", err))
 		}
 
