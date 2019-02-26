@@ -37,6 +37,8 @@ import (
 	"github.com/coreos/jwtproxy/jwt/privatekey"
 	"github.com/coreos/jwtproxy/proxy"
 	"github.com/coreos/jwtproxy/stop"
+
+	"go.opencensus.io/plugin/ochttp"
 )
 
 type StoppableProxyHandler struct {
@@ -187,11 +189,16 @@ func newRouter(upstream *url.URL) router {
 		}
 	}
 
+	// use opencensus roundTripper
+	roundTripper := newOpenCensusRoundTripper()
+
 	// Upstream is an HTTP or HTTPS endpoint.
 	// - Set the request's scheme and host to the upstream ones.
 	// - Prepend the request's path with the upstream path.
 	// - Merge query values from request and upstream.
+
 	return func(r *http.Request, ctx *goproxy.ProxyCtx) {
+		ctx.RoundTripper = roundTripper
 		r.URL.Scheme = upstream.Scheme
 		r.URL.Host = upstream.Host
 		r.URL.Path = singleJoiningSlash(upstream.Path, r.URL.Path)
@@ -261,4 +268,16 @@ func newUnixRoundTripper(sockPath string) *unixRoundTripper {
 
 func (urt *unixRoundTripper) RoundTrip(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Response, error) {
 	return urt.Transport.RoundTrip(req)
+}
+
+type openCensusRoundTripper struct {
+	*ochttp.Transport
+}
+
+func newOpenCensusRoundTripper() *openCensusRoundTripper {
+	return &openCensusRoundTripper{Transport: &ochttp.Transport{}}
+}
+
+func (ort *openCensusRoundTripper) RoundTrip(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Response, error) {
+	return ort.Transport.RoundTrip(req)
 }
