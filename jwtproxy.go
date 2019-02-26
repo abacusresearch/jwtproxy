@@ -20,7 +20,6 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	"net/http"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -145,11 +144,6 @@ func StartReverseProxy(rpConfig config.VerifierProxyConfig, stopper *stop.Group,
 		return done
 	}
 	stopper.AddFunc(reverseStopper)
-}
-
-type ocTransport struct{
-	http.Transport
-	ochttp ochttp.Transport
 }
 
 func startProxy(abort chan<- error, listenAddr, crtFile, keyFile string, shutdownTimeout time.Duration, proxyName string, proxy *proxy.Proxy) {

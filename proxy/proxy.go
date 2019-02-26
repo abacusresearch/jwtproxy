@@ -30,6 +30,8 @@ import (
 	"github.com/coreos/jwtproxy/stop"
 	"github.com/coreos/goproxy"
 	"github.com/tylerb/graceful"
+
+	"go.opencensus.io/plugin/ochttp"
 )
 
 type Handler func(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response)
@@ -47,7 +49,7 @@ func (proxy *Proxy) Serve(listenAddr, crtFile, keyFile string, shutdownTimeout t
 		NoSignalHandling: true,
 		Server: &http.Server{
 			Addr:    listenAddr,
-			Handler: proxy.ProxyHttpServer,
+			Handler:  &ochttp.Handler{Handler: proxy.ProxyHttpServer},
 		},
 	}
 	proxy.shutdownTimeout = shutdownTimeout
