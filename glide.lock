@@ -1,6 +1,10 @@
-hash: 09e8c1627ad1850f5ca6f150e2a59c55e24c456c4e59953e029e74e047ec5057
-updated: 2019-02-26T15:34:21.768015072+01:00
+hash: 0457620ff02215a4c2e8b19516dec21b04802e8b760b658d3e6ee6f8bbb298a1
+updated: 2019-02-26T16:01:30.669717006+01:00
 imports:
+- name: git.apache.org/thrift.git
+  version: a34f78385f3cd5105d9d82a8922837ffab56e281
+  subpackages:
+  - lib/go/thrift
 - name: github.com/coreos/go-oidc
   version: f427f54ef96beaa1db5fabbe4fff00de535d5494
   subpackages:
@@ -49,6 +53,8 @@ imports:
   subpackages:
   - examples/exporter
   - exemplar
+  - exporter/jaeger
+  - exporter/jaeger/internal/gen-go/jaeger
   - internal
   - internal/tagencoding
   - plugin/ochttp
@@ -65,10 +71,18 @@ imports:
   version: 024ed629fd292398cfd43c9678a5bf004f7defdc
   subpackages:
   - netutil
+- name: golang.org/x/sync
+  version: 37e7f081c4d4c64e13b10787722085407fe5d15f
+  subpackages:
+  - semaphore
 - name: golang.org/x/sys
   version: a60af9cbbc6ab800af4f2be864a31f423a0ae1f2
   subpackages:
   - unix
+- name: google.golang.org/api
+  version: 19e022d8cf43ce81f046bae8cc18c5397cc7732f
+  subpackages:
+  - support/bundler
 - name: gopkg.in/square/go-jose.v2
   version: 77e6c51d4de65c9a8d5a27a99e0e2721b12f1a2c
   subpackages:
