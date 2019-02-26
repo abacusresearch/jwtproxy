@@ -39,6 +39,7 @@ import (
 	"github.com/coreos/jwtproxy/stop"
 
 	"go.opencensus.io/plugin/ochttp"
+	"go.opencensus.io/trace"
 )
 
 type StoppableProxyHandler struct {
@@ -128,8 +129,18 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 
 	// Create a reverse proxy.Handler that will verify JWT from http.Requests.
 	handler := func(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
+		_, span := trace.StartSpan(r.Context(), "jwt-verification")
+
+		// Make the span close at the end of this function.
+		defer span.End()
+
 		signedClaims, err := Verify(r, keyServer, nonceStorage, cfg.Audience.URL, cfg.MaxSkew, cfg.MaxTTL)
 		if err != nil {
+			log.Error("jwtproxy: unable to verify request", err)
+			span.SetStatus(trace.Status{
+				Code:    trace.StatusCodeUnauthenticated,
+				Message: err.Error(),
+			})
 			return r, goproxy.NewResponse(r, goproxy.ContentTypeText, http.StatusUnauthorized, fmt.Sprintf("jwtproxy: unable to verify request: %s", err))
 		}
 
@@ -137,6 +148,11 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 		for _, verifier := range claimsVerifiers {
 			err := verifier.Handle(r, signedClaims)
 			if err != nil {
+				log.Error("Error verifying claims", err)
+				span.SetStatus(trace.Status{
+					Code:    trace.StatusCodeUnauthenticated,
+					Message: err.Error(),
+				})
 				return r, goproxy.NewResponse(r, goproxy.ContentTypeText, http.StatusForbidden, fmt.Sprintf("Error verifying claims: %s", err))
 			}
 		}
