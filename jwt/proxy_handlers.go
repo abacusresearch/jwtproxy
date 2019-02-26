@@ -37,10 +37,6 @@ import (
 	"github.com/coreos/jwtproxy/jwt/privatekey"
 	"github.com/coreos/jwtproxy/proxy"
 	"github.com/coreos/jwtproxy/stop"
-        "github.com/opentracing/opentracing-go"
-        "github.com/opentracing/opentracing-go/ext"
-        otlog "github.com/opentracing/opentracing-go/log"
-
 )
 
 type StoppableProxyHandler struct {
@@ -130,24 +126,6 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 
 	// Create a reverse proxy.Handler that will verify JWT from http.Requests.
 	handler := func(r *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
-                var serverSpan opentracing.Span
-                appSpecificOperationName := "reverse_proxy"
-                wireContext, err := opentracing.GlobalTracer().Extract(
-                    opentracing.HTTPHeaders,
-                    opentracing.HTTPHeadersCarrier(r.Header))
-                if err != nil {
-                    // Optionally record something about err here
-		    log.Info("No context from request")
-                }
-
-                // Create the span referring to the RPC client if available.
-                // If wireContext == nil, a root span will be created.
-                serverSpan = opentracing.StartSpan(
-                    appSpecificOperationName,
-                    ext.RPCServerOption(wireContext))
-
-                defer serverSpan.Finish()
-
 		signedClaims, err := Verify(r, keyServer, nonceStorage, cfg.Audience.URL, cfg.MaxSkew, cfg.MaxTTL)
 		if err != nil {
 			return r, goproxy.NewResponse(r, goproxy.ContentTypeText, http.StatusUnauthorized, fmt.Sprintf("jwtproxy: unable to verify request: %s", err))
@@ -171,8 +149,6 @@ func NewJWTVerifierHandler(cfg config.VerifierConfig) (*StoppableProxyHandler, e
 		macHEX := hex.EncodeToString(mac.Sum(nil))
 
 		r.Header["X-Auth-CouchDB-Token"] = []string{macHEX}
-
-                serverSpan.LogFields(otlog.String("user", sub))
 
 		// Route the request to upstream.
 		route(r, ctx)
@@ -216,9 +192,6 @@ func newRouter(upstream *url.URL) router {
 	// - Prepend the request's path with the upstream path.
 	// - Merge query values from request and upstream.
 	return func(r *http.Request, ctx *goproxy.ProxyCtx) {
-                sp := opentracing.StartSpan("upstream")
-                defer sp.Finish()
-
 		r.URL.Scheme = upstream.Scheme
 		r.URL.Host = upstream.Host
 		r.URL.Path = singleJoiningSlash(upstream.Path, r.URL.Path)
@@ -257,8 +230,6 @@ func newRouter(upstream *url.URL) router {
 		} else {
 			r.URL.RawQuery = upstreamQuery + "&" + r.URL.RawQuery
 		}
-
-                sp.LogFields(otlog.String("query", r.URL.RawQuery))
 	}
 }
 
