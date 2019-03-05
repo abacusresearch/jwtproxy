@@ -20,8 +20,6 @@ import (
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
-	"net/http"
-	"strings"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -159,38 +157,13 @@ func StartReverseProxy(rpConfig config.VerifierProxyConfig, stopper *stop.Group,
 	stopper.AddFunc(reverseStopper)
 }
 
-func formatSpanName(req *http.Request) string {
-	p := req.URL.Path
-	e := strings.Split(p, "/")
-	for i, x := range e {
-		if strings.HasPrefix(x, "_") {
-			continue
-		}
-
-		var el string
-		switch i {
-		case 1:
-			el = "{db}"
-		case 2:
-			el = "{doc}"
-		case 3:
-			{
-				if e[1] == "{doc}" {
-					el = "{attachment}"
-				}
-			}
-		}
-		e[i] = el
-	}
-	return strings.Join(e, "/")
-}
 
 func startProxy(abort chan<- error, listenAddr, crtFile, keyFile string, shutdownTimeout time.Duration, proxyName string, proxy *proxy.Proxy) {
 	go func() {
 		log.Infof("Starting %s proxy (Listening on '%s')", proxyName, listenAddr)
 
 		//override proxy handler
-		proxy.ProxyHttpServer.NonproxyHandler = &ochttp.Handler{Handler: proxy.ProxyHttpServer.NonproxyHandler, FormatSpanName: formatSpanName}
+		proxy.ProxyHttpServer.NonproxyHandler = &ochttp.Handler{Handler: proxy.ProxyHttpServer.NonproxyHandler, FormatSpanName: jwt.FormatSpanName}
 
 		if err := proxy.Serve(listenAddr, crtFile, keyFile, shutdownTimeout); err != nil {
 			failedToStart := fmt.Errorf("Failed to start %s proxy: %s", proxyName, err)

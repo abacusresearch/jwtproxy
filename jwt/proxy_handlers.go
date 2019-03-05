@@ -15,6 +15,9 @@
 package jwt
 
 import (
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"net"
@@ -22,10 +25,6 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
-	"crypto/hmac"
-	"crypto/sha1"
-	"encoding/hex"
-
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/coreos/goproxy"
@@ -239,11 +238,11 @@ func newRouter(upstream *url.URL) router {
 
 				queryAfter := query.Encode()
 
-				log.WithFields(log.Fields {
-					"feed": feed,
-					"queryAfter": queryAfter,
+				log.WithFields(log.Fields{
+					"feed":        feed,
+					"queryAfter":  queryAfter,
 					"queryBefore": r.URL.RawQuery,
-                                }).Info("Changing query")
+				}).Info("Changing query")
 
 				r.URL.RawQuery = queryAfter
 			}
@@ -293,9 +292,33 @@ type openCensusRoundTripper struct {
 }
 
 func newOpenCensusRoundTripper() *openCensusRoundTripper {
-	return &openCensusRoundTripper{Transport: &ochttp.Transport{}}
+	return &openCensusRoundTripper{Transport: &ochttp.Transport{FormatSpanName: FormatSpanName}}
 }
 
 func (ort *openCensusRoundTripper) RoundTrip(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Response, error) {
 	return ort.Transport.RoundTrip(req)
+}
+
+func FormatSpanName(req *http.Request) string {
+	p := req.URL.Path
+	e := strings.Split(p, "/")
+	for i, x := range e {
+		if strings.HasPrefix(x, "_") {
+			continue
+		}
+
+		var el string
+		switch i {
+		case 1:
+			el = "{db}"
+		case 2:
+			el = "{doc}"
+		case 3:
+			if e[1] == "{doc}" {
+				el = "{attachment}"
+			}
+		}
+		e[i] = el
+	}
+	return strings.Join(e, "/")
 }
