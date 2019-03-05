@@ -49,7 +49,7 @@ func (proxy *Proxy) Serve(listenAddr, crtFile, keyFile string, shutdownTimeout t
 		NoSignalHandling: true,
 		Server: &http.Server{
 			Addr:    listenAddr,
-			Handler:  &ochttp.Handler{Handler: proxy.ProxyHttpServer},
+			Handler:  &ochttp.Handler{Handler: proxy.ProxyHttpServer, FormatSpanName: FormatSpanName},
 		},
 	}
 	proxy.shutdownTimeout = shutdownTimeout
@@ -214,4 +214,28 @@ func readCA(caKeyPath, caCertPath string) (*tls.Certificate, error) {
 
 	ca.Leaf, err = x509.ParseCertificate(ca.Certificate[0])
 	return &ca, err
+}
+
+func FormatSpanName(req *http.Request) string {
+	p := req.URL.Path
+	e := strings.Split(p, "/")
+	for i, x := range e {
+		if strings.HasPrefix(x, "_") {
+			continue
+		}
+
+		var el string
+		switch i {
+		case 1:
+			el = "{db}"
+		case 2:
+			el = "{doc}"
+		case 3:
+			if e[1] == "{doc}" {
+				el = "{attachment}"
+			}
+		}
+		e[i] = el
+	}
+	return strings.Join(e, "/")
 }
