@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc. All rights reserved.
+// Copyright 2019 Google LLC.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -6,13 +6,39 @@
 
 // Package bigtableadmin provides access to the Cloud Bigtable Admin API.
 //
-// See https://cloud.google.com/bigtable/
+// For product documentation, see: https://cloud.google.com/bigtable/
+//
+// Creating a client
 //
 // Usage example:
 //
 //   import "google.golang.org/api/bigtableadmin/v2"
 //   ...
-//   bigtableadminService, err := bigtableadmin.New(oauthHttpClient)
+//   ctx := context.Background()
+//   bigtableadminService, err := bigtableadmin.NewService(ctx)
+//
+// In this example, Google Application Default Credentials are used for authentication.
+//
+// For information on how to create and obtain Application Default Credentials, see https://developers.google.com/identity/protocols/application-default-credentials.
+//
+// Other authentication options
+//
+// By default, all available scopes (see "Constants") are used to authenticate. To restrict scopes, use option.WithScopes:
+//
+//   bigtableadminService, err := bigtableadmin.NewService(ctx, option.WithScopes(bigtableadmin.CloudPlatformReadOnlyScope))
+//
+// To use an API key for authentication (note: some APIs do not support API keys), use option.WithAPIKey:
+//
+//   bigtableadminService, err := bigtableadmin.NewService(ctx, option.WithAPIKey("AIza..."))
+//
+// To use an OAuth token (e.g., a user token obtained via a three-legged OAuth flow), use option.WithTokenSource:
+//
+//   config := &oauth2.Config{...}
+//   // ...
+//   token, err := config.Exchange(ctx, ...)
+//   bigtableadminService, err := bigtableadmin.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
+//
+// See https://godoc.org/google.golang.org/api/option/ for details on options.
 package bigtableadmin // import "google.golang.org/api/bigtableadmin/v2"
 
 import (
@@ -29,6 +55,8 @@ import (
 
 	gensupport "google.golang.org/api/gensupport"
 	googleapi "google.golang.org/api/googleapi"
+	option "google.golang.org/api/option"
+	htransport "google.golang.org/api/transport/http"
 )
 
 // Always reference these packages, just in case the auto-generated code
@@ -80,6 +108,40 @@ const (
 	CloudPlatformReadOnlyScope = "https://www.googleapis.com/auth/cloud-platform.read-only"
 )
 
+// NewService creates a new Service.
+func NewService(ctx context.Context, opts ...option.ClientOption) (*Service, error) {
+	scopesOption := option.WithScopes(
+		"https://www.googleapis.com/auth/bigtable.admin",
+		"https://www.googleapis.com/auth/bigtable.admin.cluster",
+		"https://www.googleapis.com/auth/bigtable.admin.instance",
+		"https://www.googleapis.com/auth/bigtable.admin.table",
+		"https://www.googleapis.com/auth/cloud-bigtable.admin",
+		"https://www.googleapis.com/auth/cloud-bigtable.admin.cluster",
+		"https://www.googleapis.com/auth/cloud-bigtable.admin.table",
+		"https://www.googleapis.com/auth/cloud-platform",
+		"https://www.googleapis.com/auth/cloud-platform.read-only",
+	)
+	// NOTE: prepend, so we don't override user-specified scopes.
+	opts = append([]option.ClientOption{scopesOption}, opts...)
+	client, endpoint, err := htransport.NewClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	s, err := New(client)
+	if err != nil {
+		return nil, err
+	}
+	if endpoint != "" {
+		s.BasePath = endpoint
+	}
+	return s, nil
+}
+
+// New creates a new Service. It uses the provided http.Client for requests.
+//
+// Deprecated: please use NewService instead.
+// To provide a custom HTTP client, use option.WithHTTPClient.
+// If you are using google.golang.org/api/googleapis/transport.APIKey, use option.WithAPIKey with NewService instead.
 func New(client *http.Client) (*Service, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
@@ -453,7 +515,7 @@ type Binding struct {
 	//    For example, `admins@example.com`.
 	//
 	//
-	// * `domain:{domain}`: A Google Apps domain name that represents all
+	// * `domain:{domain}`: The G Suite domain (primary) that represents all
 	// the
 	//    users of that domain. For example, `google.com` or
 	// `example.com`.
@@ -648,7 +710,7 @@ func (s *Cluster) MarshalJSON() ([]byte, error) {
 
 // ClusterState: The state of a table's data in a particular cluster.
 type ClusterState struct {
-	// ReplicationState: (`OutputOnly`)
+	// ReplicationState: Output only.
 	// The state of replication for the table in this cluster.
 	//
 	// Possible values:
@@ -745,6 +807,21 @@ type CreateClusterMetadata struct {
 
 	// RequestTime: The time at which the original request was received.
 	RequestTime string `json:"requestTime,omitempty"`
+
+	// Tables: Keys: the full `name` of each table that existed in the
+	// instance when
+	// CreateCluster was first called,
+	// i.e.
+	// `projects/<project>/instances/<instance>/tables/<table>`. Any table
+	// added
+	// to the instance by a later API call will be created in the new
+	// cluster by
+	// that API call, not this one.
+	//
+	// Values: information on how much of a table's data has been copied to
+	// the
+	// newly-created cluster so far.
+	Tables map[string]TableProgress `json:"tables,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g. "FinishTime") to
 	// unconditionally include in API requests. By default, fields with
@@ -2049,7 +2126,7 @@ func (s *Status) MarshalJSON() ([]byte, error) {
 // timestamp.
 // Each table is served using the resources of its parent cluster.
 type Table struct {
-	// ClusterStates: (`OutputOnly`)
+	// ClusterStates: Output only.
 	// Map from cluster ID to per-cluster table state.
 	// If it could not be determined whether or not the table has data in
 	// a
@@ -2073,7 +2150,7 @@ type Table struct {
 	// rejected.
 	// If unspecified at creation time, the value will be set to
 	// `MILLIS`.
-	// Views: `SCHEMA_VIEW`, `FULL`
+	// Views: `SCHEMA_VIEW`, `FULL`.
 	//
 	// Possible values:
 	//   "TIMESTAMP_GRANULARITY_UNSPECIFIED" - The user did not specify a
@@ -2082,7 +2159,7 @@ type Table struct {
 	//   "MILLIS" - The table keeps data versioned at a granularity of 1ms.
 	Granularity string `json:"granularity,omitempty"`
 
-	// Name: (`OutputOnly`)
+	// Name: Output only.
 	// The unique name of the table. Values are of the
 	// form
 	// `projects/<project>/instances/<instance>/tables/_a-zA-Z0-9*`.
@@ -2113,6 +2190,56 @@ type Table struct {
 
 func (s *Table) MarshalJSON() ([]byte, error) {
 	type NoMethod Table
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+// TableProgress: Progress info for copying a table's data to the new
+// cluster.
+type TableProgress struct {
+	// EstimatedCopiedBytes: Estimate of the number of bytes copied so far
+	// for this table.
+	// This will eventually reach 'estimated_size_bytes' unless the table
+	// copy
+	// is CANCELLED.
+	EstimatedCopiedBytes int64 `json:"estimatedCopiedBytes,omitempty,string"`
+
+	// EstimatedSizeBytes: Estimate of the size of the table to be copied.
+	EstimatedSizeBytes int64 `json:"estimatedSizeBytes,omitempty,string"`
+
+	// Possible values:
+	//   "STATE_UNSPECIFIED"
+	//   "PENDING" - The table has not yet begun copying to the new cluster.
+	//   "COPYING" - The table is actively being copied to the new cluster.
+	//   "COMPLETED" - The table has been fully copied to the new cluster.
+	//   "CANCELLED" - The table was deleted before it finished copying to
+	// the new cluster.
+	// Note that tables deleted after completion will stay marked
+	// as
+	// COMPLETED, not CANCELLED.
+	State string `json:"state,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g.
+	// "EstimatedCopiedBytes") to unconditionally include in API requests.
+	// By default, fields with empty values are omitted from API requests.
+	// However, any non-pointer, non-interface field appearing in
+	// ForceSendFields will be sent to the server regardless of whether the
+	// field is empty or not. This may be used to include empty fields in
+	// Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "EstimatedCopiedBytes") to
+	// include in API requests with the JSON null value. By default, fields
+	// with empty values are omitted from API requests. However, any field
+	// with an empty value appearing in NullFields will be sent to the
+	// server as null. It is an error if a field in this list has a
+	// non-empty value. This may be used to include null fields in Patch
+	// requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *TableProgress) MarshalJSON() ([]byte, error) {
+	type NoMethod TableProgress
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }

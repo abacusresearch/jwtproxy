@@ -1,10 +1,14 @@
-hash: 0457620ff02215a4c2e8b19516dec21b04802e8b760b658d3e6ee6f8bbb298a1
-updated: 2019-02-26T16:01:30.669717006+01:00
+hash: 256a6a34d6d4d7d0456c412d0dd83360b50b6cee9fe37c0c7a60db20401d4a46
+updated: 2019-04-01T16:39:46.808561054+02:00
 imports:
-- name: git.apache.org/thrift.git
-  version: a34f78385f3cd5105d9d82a8922837ffab56e281
+- name: github.com/apache/thrift
+  version: 17fa32f27556af3893beee9e1c364a4d997b3cbf
   subpackages:
   - lib/go/thrift
+- name: github.com/beorn7/perks
+  version: 4c0e84591b9aa9e6dcfdf3e020114cd81f89d5f9
+  subpackages:
+  - quantile
 - name: github.com/coreos/go-oidc
   version: f427f54ef96beaa1db5fabbe4fff00de535d5494
   subpackages:
@@ -30,16 +34,47 @@ imports:
   version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
   subpackages:
   - spew
+- name: github.com/golang/protobuf
+  version: 8616e8ee5e20a1704615e6c8d7afcdac06087a67
+  subpackages:
+  - proto
 - name: github.com/gregjones/httpcache
   version: 4b02602f71f4346dfbd3ef8f4d15cc2a318b32c1
+- name: github.com/hashicorp/golang-lru
+  version: a0d98a5f288019575c6d1f4bb1573fef2d1fcdc4
+  subpackages:
+  - simplelru
 - name: github.com/jonboulle/clockwork
   version: ed104f61ea4877bea08af6f759805674861e968d
+- name: github.com/matttproud/golang_protobuf_extensions
+  version: c12348ce28de40eed0136aa2b644d0ee0650e56c
+  subpackages:
+  - pbutil
 - name: github.com/patrickmn/go-cache
   version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pmezard/go-difflib
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
   - difflib
+- name: github.com/prometheus/client_golang
+  version: c5b7fccd204277076155f10851dad72b76a49317
+  subpackages:
+  - prometheus
+  - prometheus/promhttp
+- name: github.com/prometheus/client_model
+  version: 6f3806018612930941127f2a7c6c453ba2c527d2
+  subpackages:
+  - go
+- name: github.com/prometheus/common
+  version: 49fee292b27bfff7f354ee0f64e1bc4850462edf
+  subpackages:
+  - expfmt
+  - internal/bitbucket.org/ww/goautoneg
+  - model
+- name: github.com/prometheus/procfs
+  version: a1dba9ce8baed984a2495b658c82687f8157b98f
+  subpackages:
+  - xfs
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
 - name: github.com/stretchr/testify
@@ -49,12 +84,13 @@ imports:
 - name: github.com/tylerb/graceful
   version: 4654dfbb6ad53cb5e27f37d99b02e16c1872fbbb
 - name: go.opencensus.io
-  version: 2b5032d79456124f42db6b7eb19ac6c155449dc2
+  version: 3b8e2721f2c3c01fa1bf4a2e455874e7b8319cd7
   subpackages:
   - examples/exporter
   - exemplar
   - exporter/jaeger
   - exporter/jaeger/internal/gen-go/jaeger
+  - exporter/prometheus
   - internal
   - internal/tagencoding
   - plugin/ochttp
@@ -80,7 +116,7 @@ imports:
   subpackages:
   - unix
 - name: google.golang.org/api
-  version: 19e022d8cf43ce81f046bae8cc18c5397cc7732f
+  version: bce707a4d0ea3488942724b3bcc1c8338f38f991
   subpackages:
   - support/bundler
 - name: gopkg.in/square/go-jose.v2

@@ -1,4 +1,4 @@
-// Copyright 2018 Google Inc. All rights reserved.
+// Copyright 2019 Google LLC.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -6,13 +6,35 @@
 
 // Package androidenterprise provides access to the Google Play EMM API.
 //
-// See https://developers.google.com/android/work/play/emm-api
+// For product documentation, see: https://developers.google.com/android/work/play/emm-api
+//
+// Creating a client
 //
 // Usage example:
 //
 //   import "google.golang.org/api/androidenterprise/v1"
 //   ...
-//   androidenterpriseService, err := androidenterprise.New(oauthHttpClient)
+//   ctx := context.Background()
+//   androidenterpriseService, err := androidenterprise.NewService(ctx)
+//
+// In this example, Google Application Default Credentials are used for authentication.
+//
+// For information on how to create and obtain Application Default Credentials, see https://developers.google.com/identity/protocols/application-default-credentials.
+//
+// Other authentication options
+//
+// To use an API key for authentication (note: some APIs do not support API keys), use option.WithAPIKey:
+//
+//   androidenterpriseService, err := androidenterprise.NewService(ctx, option.WithAPIKey("AIza..."))
+//
+// To use an OAuth token (e.g., a user token obtained via a three-legged OAuth flow), use option.WithTokenSource:
+//
+//   config := &oauth2.Config{...}
+//   // ...
+//   token, err := config.Exchange(ctx, ...)
+//   androidenterpriseService, err := androidenterprise.NewService(ctx, option.WithTokenSource(config.TokenSource(ctx, token)))
+//
+// See https://godoc.org/google.golang.org/api/option/ for details on options.
 package androidenterprise // import "google.golang.org/api/androidenterprise/v1"
 
 import (
@@ -29,6 +51,8 @@ import (
 
 	gensupport "google.golang.org/api/gensupport"
 	googleapi "google.golang.org/api/googleapi"
+	option "google.golang.org/api/option"
+	htransport "google.golang.org/api/transport/http"
 )
 
 // Always reference these packages, just in case the auto-generated code
@@ -56,6 +80,32 @@ const (
 	AndroidenterpriseScope = "https://www.googleapis.com/auth/androidenterprise"
 )
 
+// NewService creates a new Service.
+func NewService(ctx context.Context, opts ...option.ClientOption) (*Service, error) {
+	scopesOption := option.WithScopes(
+		"https://www.googleapis.com/auth/androidenterprise",
+	)
+	// NOTE: prepend, so we don't override user-specified scopes.
+	opts = append([]option.ClientOption{scopesOption}, opts...)
+	client, endpoint, err := htransport.NewClient(ctx, opts...)
+	if err != nil {
+		return nil, err
+	}
+	s, err := New(client)
+	if err != nil {
+		return nil, err
+	}
+	if endpoint != "" {
+		s.BasePath = endpoint
+	}
+	return s, nil
+}
+
+// New creates a new Service. It uses the provided http.Client for requests.
+//
+// Deprecated: please use NewService instead.
+// To provide a custom HTTP client, use option.WithHTTPClient.
+// If you are using google.golang.org/api/googleapis/transport.APIKey, use option.WithAPIKey with NewService instead.
 func New(client *http.Client) (*Service, error) {
 	if client == nil {
 		return nil, errors.New("client is nil")
@@ -344,6 +394,10 @@ type AdministratorWebTokenSpec struct {
 	// string "androidenterprise#administratorWebTokenSpec".
 	Kind string `json:"kind,omitempty"`
 
+	// ManagedConfigurations: Options for displaying the Managed
+	// Configuration page.
+	ManagedConfigurations *AdministratorWebTokenSpecManagedConfigurations `json:"managedConfigurations,omitempty"`
+
 	// Parent: The URI of the parent frame hosting the iframe. To prevent
 	// XSS, the iframe may not be hosted at other URIs. This URI must be
 	// https.
@@ -383,6 +437,34 @@ type AdministratorWebTokenSpec struct {
 
 func (s *AdministratorWebTokenSpec) MarshalJSON() ([]byte, error) {
 	type NoMethod AdministratorWebTokenSpec
+	raw := NoMethod(*s)
+	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
+}
+
+type AdministratorWebTokenSpecManagedConfigurations struct {
+	// Enabled: Whether the Managed Configuration page is displayed. Default
+	// is true.
+	Enabled bool `json:"enabled,omitempty"`
+
+	// ForceSendFields is a list of field names (e.g. "Enabled") to
+	// unconditionally include in API requests. By default, fields with
+	// empty values are omitted from API requests. However, any non-pointer,
+	// non-interface field appearing in ForceSendFields will be sent to the
+	// server regardless of whether the field is empty or not. This may be
+	// used to include empty fields in Patch requests.
+	ForceSendFields []string `json:"-"`
+
+	// NullFields is a list of field names (e.g. "Enabled") to include in
+	// API requests with the JSON null value. By default, fields with empty
+	// values are omitted from API requests. However, any field with an
+	// empty value appearing in NullFields will be sent to the server as
+	// null. It is an error if a field in this list has a non-empty value.
+	// This may be used to include null fields in Patch requests.
+	NullFields []string `json:"-"`
+}
+
+func (s *AdministratorWebTokenSpecManagedConfigurations) MarshalJSON() ([]byte, error) {
+	type NoMethod AdministratorWebTokenSpecManagedConfigurations
 	raw := NoMethod(*s)
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
@@ -863,18 +945,17 @@ func (s *AuthenticationToken) MarshalJSON() ([]byte, error) {
 	return gensupport.MarshalJSON(raw, s.ForceSendFields, s.NullFields)
 }
 
-// AutoInstallConstraint: The Auto install constraint. Defines a set of
+// AutoInstallConstraint: The auto-install constraint. Defines a set of
 // restrictions for installation. At least one of the fields must be
 // set.
 type AutoInstallConstraint struct {
-	// ChargingStateConstraint: Charging state to constrain on.
+	// ChargingStateConstraint: Charging state constraint.
 	ChargingStateConstraint string `json:"chargingStateConstraint,omitempty"`
 
-	// DeviceIdleStateConstraint: The idle state of the device to constrain
-	// on.
+	// DeviceIdleStateConstraint: Device idle state constraint.
 	DeviceIdleStateConstraint string `json:"deviceIdleStateConstraint,omitempty"`
 
-	// NetworkTypeConstraint: Network type to constrain on.
+	// NetworkTypeConstraint: Network type constraint.
 	NetworkTypeConstraint string `json:"networkTypeConstraint,omitempty"`
 
 	// ForceSendFields is a list of field names (e.g.
@@ -903,20 +984,20 @@ func (s *AutoInstallConstraint) MarshalJSON() ([]byte, error) {
 }
 
 type AutoInstallPolicy struct {
-	// AutoInstallConstraint: The constraints for the install. Currently
-	// there can be at most one constraint.
+	// AutoInstallConstraint: The constraints for auto-installing the app.
+	// You can specify a maximum of one constraint.
 	AutoInstallConstraint []*AutoInstallConstraint `json:"autoInstallConstraint,omitempty"`
 
-	// AutoInstallMode: The auto install mode. If unset defaults to
-	// AVAILABLE.
+	// AutoInstallMode: The auto-install mode. If unset defaults to
+	// "doNotAutoInstall".
 	AutoInstallMode string `json:"autoInstallMode,omitempty"`
 
 	// AutoInstallPriority: The priority of the install, as an unsigned
-	// integer. Lower number means higher priority.
+	// integer. A lower number means higher priority.
 	AutoInstallPriority int64 `json:"autoInstallPriority,omitempty"`
 
 	// MinimumVersionCode: The minimum version of the app. If a lower
-	// version of the app is installed then the app will be auto-updated
+	// version of the app is installed, then the app will be auto-updated
 	// according to the auto-install constraints, instead of waiting for the
 	// regular auto-update.
 	MinimumVersionCode int64 `json:"minimumVersionCode,omitempty"`
@@ -2684,8 +2765,11 @@ func (s *ProductPermissions) MarshalJSON() ([]byte, error) {
 
 // ProductPolicy: The policy for a product.
 type ProductPolicy struct {
-	// AutoInstallPolicy: The auto install policy for the product.
+	// AutoInstallPolicy: The auto-install policy for the product.
 	AutoInstallPolicy *AutoInstallPolicy `json:"autoInstallPolicy,omitempty"`
+
+	// ManagedConfiguration: The managed configuration for the product.
+	ManagedConfiguration *ManagedConfiguration `json:"managedConfiguration,omitempty"`
 
 	// ProductId: The ID of the product. For example,
 	// "app:com.google.android.gm".
@@ -3643,8 +3727,9 @@ type WebApp struct {
 	// DisplayMode: The display mode of the web app.
 	DisplayMode string `json:"displayMode,omitempty"`
 
-	// Icons: A list of icons representing this website. Must have at least
-	// one element.
+	// Icons: A list of icons representing this website. If absent, a
+	// default icon (for create) or the current icon (for update) will be
+	// used.
 	Icons []*WebAppIcon `json:"icons,omitempty"`
 
 	// IsPublished: A flag whether the app has been published to the Play
@@ -5533,147 +5618,6 @@ func (c *EnterprisesGetCall) Do(opts ...googleapi.CallOption) (*Enterprise, erro
 	//   "path": "enterprises/{enterpriseId}",
 	//   "response": {
 	//     "$ref": "Enterprise"
-	//   },
-	//   "scopes": [
-	//     "https://www.googleapis.com/auth/androidenterprise"
-	//   ]
-	// }
-
-}
-
-// method id "androidenterprise.enterprises.getAndroidDevicePolicyConfig":
-
-type EnterprisesGetAndroidDevicePolicyConfigCall struct {
-	s            *Service
-	enterpriseId string
-	urlParams_   gensupport.URLParams
-	ifNoneMatch_ string
-	ctx_         context.Context
-	header_      http.Header
-}
-
-// GetAndroidDevicePolicyConfig: Deprecated and unused.
-func (r *EnterprisesService) GetAndroidDevicePolicyConfig(enterpriseId string) *EnterprisesGetAndroidDevicePolicyConfigCall {
-	c := &EnterprisesGetAndroidDevicePolicyConfigCall{s: r.s, urlParams_: make(gensupport.URLParams)}
-	c.enterpriseId = enterpriseId
-	return c
-}
-
-// Fields allows partial responses to be retrieved. See
-// https://developers.google.com/gdata/docs/2.0/basics#PartialResponse
-// for more information.
-func (c *EnterprisesGetAndroidDevicePolicyConfigCall) Fields(s ...googleapi.Field) *EnterprisesGetAndroidDevicePolicyConfigCall {
-	c.urlParams_.Set("fields", googleapi.CombineFields(s))
-	return c
-}
-
-// IfNoneMatch sets the optional parameter which makes the operation
-// fail if the object's ETag matches the given value. This is useful for
-// getting updates only after the object has changed since the last
-// request. Use googleapi.IsNotModified to check whether the response
-// error from Do is the result of In-None-Match.
-func (c *EnterprisesGetAndroidDevicePolicyConfigCall) IfNoneMatch(entityTag string) *EnterprisesGetAndroidDevicePolicyConfigCall {
-	c.ifNoneMatch_ = entityTag
-	return c
-}
-
-// Context sets the context to be used in this call's Do method. Any
-// pending HTTP request will be aborted if the provided context is
-// canceled.
-func (c *EnterprisesGetAndroidDevicePolicyConfigCall) Context(ctx context.Context) *EnterprisesGetAndroidDevicePolicyConfigCall {
-	c.ctx_ = ctx
-	return c
-}
-
-// Header returns an http.Header that can be modified by the caller to
-// add HTTP headers to the request.
-func (c *EnterprisesGetAndroidDevicePolicyConfigCall) Header() http.Header {
-	if c.header_ == nil {
-		c.header_ = make(http.Header)
-	}
-	return c.header_
-}
-
-func (c *EnterprisesGetAndroidDevicePolicyConfigCall) doRequest(alt string) (*http.Response, error) {
-	reqHeaders := make(http.Header)
-	for k, v := range c.header_ {
-		reqHeaders[k] = v
-	}
-	reqHeaders.Set("User-Agent", c.s.userAgent())
-	if c.ifNoneMatch_ != "" {
-		reqHeaders.Set("If-None-Match", c.ifNoneMatch_)
-	}
-	var body io.Reader = nil
-	c.urlParams_.Set("alt", alt)
-	c.urlParams_.Set("prettyPrint", "false")
-	urls := googleapi.ResolveRelative(c.s.BasePath, "enterprises/{enterpriseId}/androidDevicePolicyConfig")
-	urls += "?" + c.urlParams_.Encode()
-	req, err := http.NewRequest("GET", urls, body)
-	if err != nil {
-		return nil, err
-	}
-	req.Header = reqHeaders
-	googleapi.Expand(req.URL, map[string]string{
-		"enterpriseId": c.enterpriseId,
-	})
-	return gensupport.SendRequest(c.ctx_, c.s.client, req)
-}
-
-// Do executes the "androidenterprise.enterprises.getAndroidDevicePolicyConfig" call.
-// Exactly one of *AndroidDevicePolicyConfig or error will be non-nil.
-// Any non-2xx status code is an error. Response headers are in either
-// *AndroidDevicePolicyConfig.ServerResponse.Header or (if a response
-// was returned at all) in error.(*googleapi.Error).Header. Use
-// googleapi.IsNotModified to check whether the returned error was
-// because http.StatusNotModified was returned.
-func (c *EnterprisesGetAndroidDevicePolicyConfigCall) Do(opts ...googleapi.CallOption) (*AndroidDevicePolicyConfig, error) {
-	gensupport.SetOptions(c.urlParams_, opts...)
-	res, err := c.doRequest("json")
-	if res != nil && res.StatusCode == http.StatusNotModified {
-		if res.Body != nil {
-			res.Body.Close()
-		}
-		return nil, &googleapi.Error{
-			Code:   res.StatusCode,
-			Header: res.Header,
-		}
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer googleapi.CloseBody(res)
-	if err := googleapi.CheckResponse(res); err != nil {
-		return nil, err
-	}
-	ret := &AndroidDevicePolicyConfig{
-		ServerResponse: googleapi.ServerResponse{
-			Header:         res.Header,
-			HTTPStatusCode: res.StatusCode,
-		},
-	}
-	target := &ret
-	if err := gensupport.DecodeResponse(target, res); err != nil {
-		return nil, err
-	}
-	return ret, nil
-	// {
-	//   "description": "Deprecated and unused.",
-	//   "httpMethod": "GET",
-	//   "id": "androidenterprise.enterprises.getAndroidDevicePolicyConfig",
-	//   "parameterOrder": [
-	//     "enterpriseId"
-	//   ],
-	//   "parameters": {
-	//     "enterpriseId": {
-	//       "description": "The ID of the enterprise.",
-	//       "location": "path",
-	//       "required": true,
-	//       "type": "string"
-	//     }
-	//   },
-	//   "path": "enterprises/{enterpriseId}/androidDevicePolicyConfig",
-	//   "response": {
-	//     "$ref": "AndroidDevicePolicyConfig"
 	//   },
 	//   "scopes": [
 	//     "https://www.googleapis.com/auth/androidenterprise"
@@ -11678,7 +11622,7 @@ func (c *ProductsListCall) Query(query string) *ProductsListCall {
 }
 
 // Token sets the optional parameter "token": A pagination token is
-// contained in a request''s response when there are more products. The
+// contained in a request's response when there are more products. The
 // token can be used in a subsequent request to obtain more products,
 // and so forth. This parameter cannot be used in the initial request.
 func (c *ProductsListCall) Token(token string) *ProductsListCall {
@@ -11819,7 +11763,7 @@ func (c *ProductsListCall) Do(opts ...googleapi.CallOption) (*ProductsListRespon
 	//       "type": "string"
 	//     },
 	//     "token": {
-	//       "description": "A pagination token is contained in a request''s response when there are more products. The token can be used in a subsequent request to obtain more products, and so forth. This parameter cannot be used in the initial request.",
+	//       "description": "A pagination token is contained in a request's response when there are more products. The token can be used in a subsequent request to obtain more products, and so forth. This parameter cannot be used in the initial request.",
 	//       "location": "query",
 	//       "type": "string"
 	//     }

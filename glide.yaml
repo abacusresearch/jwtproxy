@@ -65,7 +65,11 @@ import:
   - examples/exporter
   - stats/view
   - trace
+  - exporter/prometheus
+  - exporter/jaeger
 - package: google.golang.org/api
   version: ^0.1.0
   subpackages:
   - support/bundler
+- package: github.com/apache/thrift
+  version: ~0.12.0
