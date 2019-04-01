@@ -17,6 +17,7 @@ package jwtproxy
 import (
 	"fmt"
 	"go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/exporter/prometheus"
 	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
@@ -50,8 +51,16 @@ func RunProxies(config *config.Config) (*stop.Group, chan error) {
 		log.Fatal(err)
 	}
 
-	/* metrics disabled for now */
-	//view.RegisterExporter(exporter)
+	// Use separate prometheus exporter for now as we can't use ocagent
+	prom, err := prometheus.NewExporter(prometheus.Options{
+		Namespace: "jwtproxy",
+	})
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	view.RegisterExporter(prom)
 	trace.RegisterExporter(exporter)
 
 	// Always trace for this demo. In a production application, you should
