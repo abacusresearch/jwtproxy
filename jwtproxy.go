@@ -22,6 +22,7 @@ import (
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 	"time"
+	"net/http"
 
 	log "github.com/Sirupsen/logrus"
 
@@ -66,7 +67,7 @@ func RunProxies(config *config.Config) (*stop.Group, chan error) {
 	// run metrics endpoint
 	go func() {
 		mux := http.NewServeMux()
-		mux.Handle("/metrics", pe)
+		mux.Handle("/metrics", prom)
 		if err := http.ListenAndServe(":8888", mux); err != nil {
 			log.Fatalf("Failed to run Prometheus /metrics endpoint: %v", err)
 		}
