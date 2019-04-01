@@ -63,6 +63,11 @@ func RunProxies(config *config.Config) (*stop.Group, chan error) {
 
 	view.RegisterExporter(prom)
 	trace.RegisterExporter(exporter)
+	// Register the views to collect server request count.
+	if err := view.Register(ochttp.DefaultServerViews...); err != nil {
+		log.Fatal(err)
+	}
+
 
 	// run metrics endpoint
 	go func() {
