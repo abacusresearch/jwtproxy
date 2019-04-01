@@ -63,6 +63,15 @@ func RunProxies(config *config.Config) (*stop.Group, chan error) {
 	view.RegisterExporter(prom)
 	trace.RegisterExporter(exporter)
 
+	// run metrics endpoint
+	go func() {
+		mux := http.NewServeMux()
+		mux.Handle("/metrics", pe)
+		if err := http.ListenAndServe(":8888", mux); err != nil {
+			log.Fatalf("Failed to run Prometheus /metrics endpoint: %v", err)
+		}
+	}()
+
 	// Always trace for this demo. In a production application, you should
 	// configure this to a trace.ProbabilitySampler set at the desired
 	// probability.
